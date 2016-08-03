@@ -22,7 +22,7 @@ class TreeHelper
     {
         // We must have an ID to continue
         if(!isset($nested[$idKey])) {
-            throw new \Exception(sprintf('We must have a "%s" field as identifier', $idKey));
+            $nested[$idKey] = static::generateId();
         }
 
         // We use this to pass thru to the flat list. We don't need the nested model here
@@ -46,18 +46,22 @@ class TreeHelper
                 $nodes = static::normalize($child, $idKey, $childrenKey, $parentKey, $list, $nested[$idKey]);
 
                 // Add the child nodes to the list of node IDs
-                $list += $nodes;
+                $list = array_merge($list, $nodes);
 
                 // The first node in the list is its direct child
                 $data[$childrenKey][] = current($nodes)[$idKey];
             }
+
         }
 
         // Add this item to the list
-        $list[$nested[$idKey]] = $data;
+        $list = array_merge([$data], $list);
+
+        // We need to have unique values otherwise we get into a stack overflow.
+        $list = array_unique($list, SORT_REGULAR);
 
         // Reverse the list so it gets the right parent child order of nodes
-        return array_reverse($list);
+        return $list;
     }
 
     /**

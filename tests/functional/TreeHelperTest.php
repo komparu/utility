@@ -74,13 +74,16 @@ class TreeHelperTest extends PHPUnit_Framework_TestCase
                 'id' => 1,
                 'title' => 'foo',
                 'parent' => null,
-                'children' => [2],
             ],
             [
                 'id' => 2,
                 'title' => 'bar',
                 'parent' => 1,
-                'children' => [],
+            ],
+            [
+                'id' => 3,
+                'title' => 'baz',
+                'parent' => 2,
             ],
         ];
 
@@ -93,7 +96,14 @@ class TreeHelperTest extends PHPUnit_Framework_TestCase
                     'id' => 2,
                     'title' => 'bar',
                     'parent' => 1,
-                    'children' => [],
+                    'children' => [
+                        [
+                            'id' => 3,
+                            'title' => 'baz',
+                            'parent' => 2,
+                            'children' => []
+                        ]
+                    ],
                 ]
             ]
         ];
