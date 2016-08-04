@@ -20,6 +20,20 @@ class TreeHelper
      */
     public static function normalize(Array $nested, $idKey = 'id', $childrenKey = 'children', $parentKey = 'parent', $list = [], $parent = null)
     {
+        return array_values(static::normalizeKeyed($nested, $idKey, $childrenKey, $parentKey, $list, $parent));
+    }
+
+    /**
+     * @param array $nested
+     * @param string $idKey
+     * @param string $childrenKey
+     * @param string $parentKey
+     * @param array $list
+     * @param null $parent
+     * @return array
+     */
+    protected static function normalizeKeyed(Array $nested, $idKey = 'id', $childrenKey = 'children', $parentKey = 'parent', $list = [], $parent = null)
+    {
         // We must have an ID to continue
         if(!isset($nested[$idKey])) {
             $nested[$idKey] = static::generateId();
@@ -43,10 +57,11 @@ class TreeHelper
             foreach($nested[$childrenKey] as $child) {
 
                 // Find the child nodes if there are any
-                $nodes = static::normalize($child, $idKey, $childrenKey, $parentKey, $list, $nested[$idKey]);
+                $nodes = static::normalizeKeyed($child, $idKey, $childrenKey, $parentKey, $list, $nested[$idKey]);
 
                 // Add the child nodes to the list of node IDs
-                $list = array_merge($list, $nodes);
+                // They are grouped by their id, so they always are unique
+                $list += $nodes;
 
                 // The first node in the list is its direct child
                 $data[$childrenKey][] = current($nodes)[$idKey];
@@ -55,10 +70,7 @@ class TreeHelper
         }
 
         // Add this item to the list
-        $list = array_merge([$data], $list);
-
-        // We need to have unique values otherwise we get into a stack overflow.
-        $list = array_unique($list, SORT_REGULAR);
+        $list = [$data[$idKey] => $data] + $list;
 
         // Reverse the list so it gets the right parent child order of nodes
         return $list;
