@@ -90,17 +90,14 @@ class TreeHelperTest extends PHPUnit_Framework_TestCase
         $expected = [
             'id' => 1,
             'title' => 'foo',
-            'parent' => null,
             'children' => [
                 [
                     'id' => 2,
                     'title' => 'bar',
-                    'parent' => 1,
                     'children' => [
                         [
                             'id' => 3,
                             'title' => 'baz',
-                            'parent' => 2,
                             'children' => []
                         ]
                     ],
@@ -131,12 +128,10 @@ class TreeHelperTest extends PHPUnit_Framework_TestCase
         $expected = [
             '__id' => 1,
             'title' => 'foo',
-            '##parent' => null,
             '@@children' => [
                 [
                     '__id' => 2,
                     'title' => 'bar',
-                    '##parent' => 1,
                     '@@children' => [],
                 ]
             ]

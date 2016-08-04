@@ -121,6 +121,9 @@ class TreeHelper
         // Replace the list of IDs with actual nodes
         $tree[$childrenKey] = isset($children) ? $children : [];
 
+        // Remove the parent, because we now have the actual children
+        unset($tree[$parentKey]);
+
         return $tree;
     }
 
