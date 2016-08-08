@@ -8,6 +8,17 @@ namespace Komparu\Utility;
 class ArrayHelper
 {
     /**
+     * Return the first item of an array
+     *
+     * @param array $arr
+     * @return mixed
+     */
+    public static function head(Array $arr)
+    {
+        return reset($arr);
+    }
+
+    /**
      * Is the array associative?
      * @param array $arr
      * @return bool

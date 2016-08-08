@@ -64,7 +64,7 @@ class TreeHelper
                 $list += $nodes;
 
                 // The first node in the list is its direct child
-                $data[$childrenKey][] = current($nodes)[$idKey];
+                $data[$childrenKey][] = ArrayHelper::head($nodes)[$idKey];
             }
 
         }
