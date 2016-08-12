@@ -274,4 +274,17 @@ class TreeHelperTest extends PHPUnit_Framework_TestCase
         $this->assertSame(TreeHelper::findAllChildren($flattened, 1), $expected);
     }
 
+    public function testNormalizeWithLargeTree()
+    {
+        $data = file_get_contents(__DIR__ . '/../data/test.json');
+        $tree = json_decode($data, true);
+
+        $start = microtime(true);
+        $result = TreeHelper::normalize($tree);
+        $end = microtime(true);
+        var_dump($end - $start);
+
+        $this->assertCount(381, $result);
+    }
+
 }

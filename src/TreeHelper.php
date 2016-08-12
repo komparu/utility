@@ -18,12 +18,22 @@ class TreeHelper
      * @param null $parent
      * @return array
      */
-    public static function normalize(Array $nested, $idKey = 'id', $childrenKey = 'children', $parentKey = 'parent', $list = [], $parent = null)
+    public static function normalize(Array $nested, $idKey = 'id', $childrenKey = 'children', $parentKey = 'parent')
     {
-        return array_values(static::normalizeKeyed($nested, $idKey, $childrenKey, $parentKey, $list, $parent));
+        $stack = new \SplStack();
+        $stack->push($nested);
+        $list = [];
+
+        while(!$stack->isEmpty()) {
+            $node = $stack->pop();
+            $list[] = static::normalizeWithStack($stack, $node, $idKey, $childrenKey, $parentKey);
+        }
+
+        return $list;
     }
 
     /**
+     * @param \SplStack $stack
      * @param array $nested
      * @param string $idKey
      * @param string $childrenKey
@@ -32,7 +42,7 @@ class TreeHelper
      * @param null $parent
      * @return array
      */
-    protected static function normalizeKeyed(Array $nested, $idKey = 'id', $childrenKey = 'children', $parentKey = 'parent', $list = [], $parent = null)
+    protected static function normalizeWithStack(\SplStack $stack, Array $nested, $idKey = 'id', $childrenKey = 'children', $parentKey = 'parent')
     {
         // We must have an ID to continue
         if(!isset($nested[$idKey])) {
@@ -45,7 +55,7 @@ class TreeHelper
         }, ARRAY_FILTER_USE_KEY);
 
         // Add the parent reference
-        $data[$parentKey] = $parent;
+        $data[$parentKey] = isset($nested[$parentKey]) ? $nested[$parentKey] : null;
 
         // Start collection the child ids
         $data[$childrenKey] = [];
@@ -56,24 +66,25 @@ class TreeHelper
             // Normalize the children
             foreach($nested[$childrenKey] as $child) {
 
-                // Find the child nodes if there are any
-                $nodes = static::normalizeKeyed($child, $idKey, $childrenKey, $parentKey, $list, $nested[$idKey]);
+                // We must have an ID to continue
+                if(!isset($child[$idKey])) {
+                    $child[$idKey] = static::generateId();
+                }
 
-                // Add the child nodes to the list of node IDs
-                // They are grouped by their id, so they always are unique
-                $list += $nodes;
+                // Add the parent relationship to this child
+                $child[$parentKey] = $nested[$idKey];
+
+                // Normalize the children for this child using a
+                // stack for performance reasons.
+                $stack->push($child);
 
                 // The first node in the list is its direct child
-                $data[$childrenKey][] = ArrayHelper::head($nodes)[$idKey];
+                $data[$childrenKey][] = $child[$idKey];
             }
 
         }
 
-        // Add this item to the list
-        $list = [$data[$idKey] => $data] + $list;
-
-        // Reverse the list so it gets the right parent child order of nodes
-        return $list;
+        return $data;
     }
 
     /**
