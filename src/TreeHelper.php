@@ -64,7 +64,7 @@ class TreeHelper
         if(isset($nested[$childrenKey]) && ArrayHelper::isCollection($nested[$childrenKey])) {
 
             // Normalize the children
-            foreach($nested[$childrenKey] as $child) {
+            foreach(array_reverse($nested[$childrenKey]) as $child) {
 
                 // We must have an ID to continue
                 if(!isset($child[$idKey])) {

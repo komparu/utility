@@ -279,12 +279,17 @@ class TreeHelperTest extends PHPUnit_Framework_TestCase
         $data = file_get_contents(__DIR__ . '/../data/test.json');
         $tree = json_decode($data, true);
 
-        $start = microtime(true);
-        $result = TreeHelper::normalize($tree);
-        $end = microtime(true);
-        var_dump($end - $start);
+//        $start = microtime(true);
+        $result = TreeHelper::normalize($tree, '@id');
+//        $end = microtime(true);
+//        var_dump($end - $start);
 
         $this->assertCount(381, $result);
+
+        $this->assertSame('fc01ec92b3ce95f7ec45d1031afa5861', $result[0]['@id']); // Website
+        $this->assertSame('m923634ccbe0630c9ac9e795c5eda54c', $result[1]['@id']); // Page 1
+        $this->assertSame('g063662299a3e48720038a19be787049', $result[29]['@id']); // Page 2
+        $this->assertSame('q52e1c6349a58c5670f486dc3fb7e934', $result[107]['@id']); // Page 3
     }
 
 }
