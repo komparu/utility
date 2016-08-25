@@ -177,9 +177,9 @@ class TreeHelper
      */
     public static function findChildren(Array $nodes, $id = null, $parentKey = 'parent')
     {
-        return array_filter($nodes, function($node) use ($parentKey, $id) {
+        return array_values(array_filter($nodes, function($node) use ($parentKey, $id) {
             return $node[$parentKey] == $id;
-        });
+        }));
     }
 
     /**
