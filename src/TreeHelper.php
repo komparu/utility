@@ -77,13 +77,17 @@ class TreeHelper
         // Find the root. If no root is provided, we try to find a node that has no parent
         $tree = $root
             ? static::findNode($flattened, $root, $idKey)
-            : static::findRoot($flattened, $idKey);
+            : static::findNode($flattened, null, $parentKey);
 
-        if(array_key_exists($parentKey, $tree))
-        {
-            $ids = array_keys(static::findChildren($flattened, $tree[$idKey], $parentKey));
+        if(!$tree) {
+            throw new \Exception(sprintf('The node "%s" could not be found', $root));
         }
-        elseif(array_key_exists($childrenKey, $tree)) {
+
+//        if(array_key_exists($parentKey, $tree))
+//        {
+//            $ids = array_keys(static::findChildren($flattened, $tree[$idKey], $parentKey));
+//        }
+        if(array_key_exists($childrenKey, $tree)) {
             $ids = $tree[$childrenKey];
         }
         else {
@@ -113,24 +117,9 @@ class TreeHelper
      */
     public static function findNode(Array $nodes, $id, $idKey = 'id')
     {
-        // We need a string or number here
-        if(!is_string($id) && !is_numeric($id)) {
-            throw new \Exception(sprintf('Node ID must be string or integer, %s given', gettype($id)));
-        }
-
         return current(array_filter($nodes, function($node) use ($idKey, $id) {
             return $node[$idKey] == $id;
         }));
-    }
-
-    /**
-     * @param array $nodes
-     * @param $idKey
-     * @return array
-     */
-    public static function findRoot(Array $nodes, $idKey = 'id')
-    {
-        return static::findNode($nodes, null, $idKey);
     }
 
     /**
