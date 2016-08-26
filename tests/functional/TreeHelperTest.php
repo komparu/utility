@@ -100,6 +100,7 @@ class TreeHelperTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(TreeHelper::denormalize($flattened), $expected);
     }
+
     public function testDenormalizeWithCustomKeys()
     {
         $flattened = [
@@ -132,6 +133,99 @@ class TreeHelperTest extends PHPUnit_Framework_TestCase
         ];
 
         $this->assertSame(TreeHelper::denormalize($flattened, '__id', '@@children', '##parent'), $expected);
+    }
+
+    public function testFindParents()
+    {
+        $flattened = [
+            [
+                'id' => 1,
+                'title' => 'foo',
+                'parent' => null,
+                'children' => [2],
+            ],
+            [
+                'id' => 2,
+                'title' => 'bar',
+                'parent' => 1,
+                'children' => [],
+            ],
+        ];
+
+        $expected = [
+            [
+                'id' => 1,
+                'title' => 'foo',
+                'parent' => null,
+                'children' => [2],
+            ],
+            [
+                'id' => 2,
+                'title' => 'bar',
+                'parent' => 1,
+                'children' => [],
+            ],
+        ];
+
+        $this->assertSame(TreeHelper::findParents($flattened, 2), $expected);
+    }
+
+    public function testFindParentsExcludingSelf()
+    {
+        $flattened = [
+            [
+                'id' => 1,
+                'title' => 'foo',
+                'parent' => null,
+                'children' => [2],
+            ],
+            [
+                'id' => 2,
+                'title' => 'bar',
+                'parent' => 1,
+                'children' => [],
+            ],
+        ];
+
+        $expected = [
+            [
+                'id' => 1,
+                'title' => 'foo',
+                'parent' => null,
+                'children' => [2],
+            ],
+        ];
+
+        $this->assertSame(TreeHelper::findParents($flattened, 2, $includeNode = false), $expected);
+    }
+
+    public function testFilter()
+    {
+        $flattened = [
+            [
+                'id' => 1,
+                'title' => 'foo',
+                'parent' => null,
+                'children' => [2],
+            ],
+            [
+                'id' => 2,
+                'title' => 'bar',
+                'parent' => 1,
+                'children' => [],
+            ],
+        ];
+
+        $expected = [
+            [
+                'id' => 1,
+                'title' => 'foo',
+                'parent' => null,
+                'children' => [2],
+            ],
+        ];
+
+        $this->assertSame(TreeHelper::filter($flattened, ['parent' => null]), $expected);
     }
 
 }

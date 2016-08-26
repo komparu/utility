@@ -85,8 +85,17 @@ class TreeHelper
             throw new \Exception(sprintf('The node "%s" for idKey "%s" could not be found', $root, $idKey));
         }
 
-        // Find the children
-        $ids = array_key_exists($childrenKey, $tree) ? $tree[$childrenKey] : [];
+        $id = $tree[$idKey];
+
+        // Find the children based on their parent
+        $ids = array_map(function($node) use ($idKey) {
+            return $node[$idKey];
+        }, array_filter($flattened, function($node) use ($parentKey, $id) {
+            return $node[$parentKey] == $id;
+        }));
+
+        // Or find the children based on their children ids
+//        $ids = array_key_exists($childrenKey, $tree) ? $tree[$childrenKey] : [];
 
         // Denormalize the children recursively
         foreach($ids as $child) {
@@ -162,6 +171,26 @@ class TreeHelper
             : [];
 
         return $includeNode ? array_merge($parents, [$node]) : $parents;
+    }
+
+    /**
+     * Narrow down the list of nodes with multiple where statements
+     *
+     * @param array $nodes
+     * @param array $where
+     * @return array
+     */
+    public static function filter(Array $nodes, Array $where)
+    {
+        return array_filter($nodes, function($node) use ($where) {
+
+            foreach($where as $key => $value) {
+                if(!array_key_exists($key, $node))  return;
+                if($node[$key] !== $value) return;
+            }
+
+            return $node;
+        });
     }
 
     /**
