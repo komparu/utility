@@ -21,9 +21,9 @@ class TreeHelper
     public static function normalize(Array $nested, $idKey = 'id', $childrenKey = 'children', $parentKey = 'parent', $list = [], $parent = null)
     {
         // We must have an ID to continue
-//        if(!isset($nested[$idKey])) {
-//            $nested[$idKey] = static::generateId();
-//        }
+        if(!isset($nested[$idKey])) {
+            throw new \Exception(sprintf('We must have a "%s" field as identifier', $idKey));
+        }
 
         // We use this to pass thru to the flat list. We don't need the nested model here
         $data = array_filter($nested, function($key) use ($childrenKey) {
@@ -70,6 +70,7 @@ class TreeHelper
      * @param string      $childrenKey
      * @param string      $parentKey
      * @param string|null $root The node ID.
+     * @throws \Exception
      * @return array
      */
     public static function denormalize(Array $flattened, $idKey = 'id', $childrenKey = 'children', $parentKey = 'parent', $root = null)
@@ -77,25 +78,17 @@ class TreeHelper
         // Find the root. If no root is provided, we try to find a node that has no parent
         $tree = $root
             ? static::findNode($flattened, $root, $idKey)
-            : static::findNode($flattened, null, $parentKey);
+            : static::findRoot($flattened, $parentKey);
 
+        // See if there is a node found where we can work with
         if(!$tree) {
-            throw new \Exception(sprintf('The node "%s" could not be found', $root));
+            throw new \Exception(sprintf('The node "%s" for idKey "%s" could not be found', $root, $idKey));
         }
 
-//        if(array_key_exists($parentKey, $tree))
-//        {
-//            $ids = array_keys(static::findChildren($flattened, $tree[$idKey], $parentKey));
-//        }
-        if(array_key_exists($childrenKey, $tree)) {
-            $ids = $tree[$childrenKey];
-        }
-        else {
-            // Return early if there are no children
-            return $tree;
-        }
+        // Find the children
+        $ids = array_key_exists($childrenKey, $tree) ? $tree[$childrenKey] : [];
 
-        // Find the children recursively
+        // Denormalize the children recursively
         foreach($ids as $child) {
             $children[] = static::denormalize($flattened, $idKey, $childrenKey, $parentKey, $child);
         }
@@ -113,13 +106,26 @@ class TreeHelper
      * @throws \Exception
      * @param $id
      * @param $idKey
-     * @return array
+     * @return array|bool
      */
     public static function findNode(Array $nodes, $id, $idKey = 'id')
     {
         return current(array_filter($nodes, function($node) use ($idKey, $id) {
             return $node[$idKey] == $id;
         }));
+    }
+
+    /**
+     * When we don't have any identifier, we can try to find the root element
+     * by searching the node that has no parent.
+     *
+     * @param array $nodes
+     * @param string $parentKey
+     * @return array|bool
+     */
+    public static function findRoot(Array $nodes, $parentKey = 'parent')
+    {
+        return static::findNode($nodes, null, $parentKey);
     }
 
     /**
