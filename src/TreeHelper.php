@@ -153,6 +153,8 @@ class TreeHelper
     }
 
     /**
+     * Find all the children recursively for one node.
+     *
      * @param array $nodes
      * @param null $id
      * @param string $idKey
