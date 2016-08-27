@@ -154,6 +154,24 @@ class TreeHelper
 
     /**
      * @param array $nodes
+     * @param null $id
+     * @param string $idKey
+     * @param string $parentKey
+     * @return array
+     */
+    public static function findAllChildren(Array $nodes, $id = null, $idKey = 'id', $parentKey = 'parent')
+    {
+        $children = static::findChildren($nodes, $id, $parentKey);
+
+        foreach($children as $child) {
+            $children = array_merge($children, static::findAllChildren($nodes, $child[$idKey], $idKey, $parentKey));
+        }
+
+        return $children;
+    }
+
+    /**
+     * @param array $nodes
      * @param $id
      * @param string $idKey
      * @param string $parentKey

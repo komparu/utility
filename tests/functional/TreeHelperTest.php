@@ -228,4 +228,45 @@ class TreeHelperTest extends PHPUnit_Framework_TestCase
         $this->assertSame(TreeHelper::filter($flattened, ['parent' => null]), $expected);
     }
 
+    public function testFindAllChildren()
+    {
+        $flattened = [
+            [
+                'id' => 1,
+                'title' => 'foo',
+                'parent' => null,
+                'children' => [2],
+            ],
+            [
+                'id' => 2,
+                'title' => 'bar',
+                'parent' => 1,
+                'children' => [3],
+            ],
+            [
+                'id' => 3,
+                'title' => 'baz',
+                'parent' => 2,
+                'children' => [],
+            ],
+        ];
+
+        $expected = [
+            [
+                'id' => 2,
+                'title' => 'bar',
+                'parent' => 1,
+                'children' => [3],
+            ],
+            [
+                'id' => 3,
+                'title' => 'baz',
+                'parent' => 2,
+                'children' => [],
+            ],
+        ];
+
+        $this->assertSame(TreeHelper::findAllChildren($flattened, 1), $expected);
+    }
+
 }
